@@ -36,7 +36,7 @@ class Kinova:
 
     self._basePosition = [-0.000000, 0.000000, 0.000000]
     self._baseOrientation = [0.000000, 0.000000, math.pi, 1.000000]
-    self._init_jointPositions = [math.pi/2, math.pi, math.pi, math.pi/2, 0, 0, 0, 1, 1, 1]
+    self._init_jointPositions = [math.pi/2, math.pi, math.pi, math.pi/6, 0, math.pi/2, 0, 1, 1, 1]
 
     self._torque_control_enabled = torque_control_enabled
     self._observation_noise_stdev = SENSOR_NOISE_STDDEV
@@ -67,12 +67,12 @@ class Kinova:
     #joint damping coefficents
     self.jd=[0.00001,0.00001,0.00001,0.00001,0.00001,0.00001,0.00001,0.00001,0.00001,0.00001,0.00001,0.00001,0.00001,0.00001]
 
-    self.ee_X_upperLimit = 0.9
-    self.ee_X_lowerLimit = -0.9
-    self.ee_Y_upperLimit = 0.9
-    self.ee_Y_lowerLimit = -0.9
-    self.ee_Z_upperLimit = 1.18
-    self.ee_Z_lowerLimit = -0.9
+    self.ee_X_upperLimit = 0.6
+    self.ee_X_lowerLimit = -0.6
+    self.ee_Y_upperLimit = 1.2
+    self.ee_Y_lowerLimit = 0
+    self.ee_Z_upperLimit = 1.20
+    self.ee_Z_lowerLimit = 0.25
 
     self.fingerAForce = 2
     self.fingerBForce = 2.5
@@ -340,7 +340,7 @@ class Kinova:
       dx = motorCommands[0]
       dy = motorCommands[1]
       dz = motorCommands[2]
-      da = motorCommands[3]
+      orn = motorCommands[3]
       fingerAngle = motorCommands[4]
       
       # EndEffectorStates = self._pybullet_client.getLinkState(self.kinovaUid, self.EndEffectorIndex)
@@ -371,9 +371,9 @@ class Kinova:
       #if (dz<0 or actualEndEffectorPos[2]<0.5):
       self.endEffectorPos[2] = self.endEffectorPos[2]+dz
 
-      self.endEffectorAngle = self.endEffectorAngle + da
+      # self.endEffectorAngle = self.endEffectorAngle + da
       pos = self.endEffectorPos
-      orn = self._pybullet_client.getQuaternionFromEuler([0,-math.pi, self.endEffectorAngle]) # -math.pi,yaw])
+      orn = self._pybullet_client.getQuaternionFromEuler([0,-math.pi, 0]) # -math.pi,yaw])
 
       if (self.useNullSpace==1):
         if (self.useOrientation==1):

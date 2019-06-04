@@ -36,7 +36,6 @@ print('episode = ', episode)
 while True:
     action = env.action_space.sample()
 
-
     _, reward, done, _ = env.step(action)
     sum_reward += reward
     if done:

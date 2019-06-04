@@ -109,7 +109,7 @@ class KinovaGymEnv(gym.Env):
       p.setGravity(0,0,-9.81)
 
       #camera configuration
-      self._CameraViewMatrix = p.computeViewMatrixFromYawPitchRoll([xpos,ypos,zpos], 1, -90, -40, 0, 2)
+      self._CameraViewMatrix = p.computeViewMatrixFromYawPitchRoll([xpos,ypos,zpos], 1, -90, -60, 0, 2)
       # self._CameraProjMatrix = p.computeProjectionMatrix(-0.5000, 0.5000, -0.5000, 1.5000, 1.0000, 6.0000)
       self._CameraProjMatrix = p.computeProjectionMatrixFOV(80, 0.5, 0, 8)
 
@@ -138,6 +138,14 @@ class KinovaGymEnv(gym.Env):
     self.np_random, seed = seeding.np_random(seed)
     return [seed]
 
+  # def getAction(self):
+  #   cupPos, cupOrn = p.getBasePositionAndOrientation(self.teacupUid)
+  #   EndEffector_pos, EndEffector_orn = self.kinova.EndEffectorObersavations()
+  #   invEndEffector_pos, invEndEffector_orn = p.invertTransform(EndEffector_pos, EndEffector_orn)
+  #   cupPosInEE, cupOrnInEE = p.multiplyTransforms(invEndEffector_pos, invEndEffector_orn, cupPos, cupOrn)
+  #
+  #   return cupPosInEE
+
   def getExtendedObservation(self):
      self._observation = []
      image_obs = p.getCameraImage(128, 128, self._CameraViewMatrix, self._CameraProjMatrix)
@@ -150,7 +158,8 @@ class KinovaGymEnv(gym.Env):
      cupPosInEE, cupOrnInEE = p.multiplyTransforms(invEndEffector_pos, invEndEffector_orn, cupPos, cupOrn)
 
      self._observation.extend(image_obs)
-     self._observation.extend([cupPos,cupOrn, cupPosInEE, cupOrnInEE])
+     self._observation.extend(kinovaState)
+     self._observation.extend([cupPos, cupOrn, cupPosInEE, cupOrnInEE])
      # gripperState  = p.getLinkState(self._kuka.kukaUid,self._kuka.kukaGripperIndex)
      # gripperPos = gripperState[0]
      # gripperOrn = gripperState[1]
@@ -196,10 +205,21 @@ class KinovaGymEnv(gym.Env):
       dv = 0.005
       dx = action[0] * dv
       dy = action[1] * dv
-      da = action[2] * 0.05
+      dz = action[2] * dv
+      # da = action[2] * 0.05
+
+      # Compute EndEffector Oritation: Oriented to the cup
+      # cupPos, cupOrn = p.getBasePositionAndOrientation(self.teacupUid)
+      # EndEffector_pos, EndEffector_orn = self.kinova.EndEffectorObersavations()
+      # invEndEffector_pos, invEndEffector_orn = p.invertTransform(EndEffector_pos, EndEffector_orn)
+      # cupPosInEE, cupOrnInEE = p.multiplyTransforms(invEndEffector_pos, invEndEffector_orn, cupPos, cupOrn)
+      #Orn = [item * 0.05 for item in list(cupOrnInEE)]
+
+      # Compute EndEffector Oritation: Oriented fixed direction
       f = 0.3
-      realAction = [dx,dy,-0.002,da,f]
-    return self.step2( realAction)
+
+      realAction = [dx,dy,dz,0,f]
+    return self.step2(realAction)
 
   def step2(self, action):
     for i in range(self._actionRepeat):
